@@ -58,24 +58,24 @@ static void call_constructors(void) {
 
 /* called from arch code */
 void lk_main(ulong arg0, ulong arg1, ulong arg2, ulong arg3) {
-    // save the boot args
+    // 保存参数
     lk_boot_args[0] = arg0;
     lk_boot_args[1] = arg1;
     lk_boot_args[2] = arg2;
     lk_boot_args[3] = arg3;
 
-    // get us into some sort of thread context
+    // 初始化线程
     thread_init_early();
 
-    // early arch stuff
+    // 架构级的初始化,关中断,配置优先级,cache等
     lk_primary_cpu_init_level(LK_INIT_LEVEL_EARLIEST, LK_INIT_LEVEL_ARCH_EARLY - 1);
     arch_early_init();
 
-    // do any super early platform initialization
+    // 平台级初始化,根据各个平台不同初始化时钟/外设等基础设备
     lk_primary_cpu_init_level(LK_INIT_LEVEL_ARCH_EARLY, LK_INIT_LEVEL_PLATFORM_EARLY - 1);
     platform_early_init();
 
-    // do any super early target initialization
+    // 板级初始化,依赖于前一级初始化
     lk_primary_cpu_init_level(LK_INIT_LEVEL_PLATFORM_EARLY, LK_INIT_LEVEL_TARGET_EARLY - 1);
     target_early_init();
 
@@ -87,7 +87,7 @@ void lk_main(ulong arg0, ulong arg1, ulong arg2, ulong arg3) {
     dprintf(INFO, "boot args 0x%lx 0x%lx 0x%lx 0x%lx\n",
             lk_boot_args[0], lk_boot_args[1], lk_boot_args[2], lk_boot_args[3]);
 
-    // bring up the kernel heap
+    // 堆栈初始化
     lk_primary_cpu_init_level(LK_INIT_LEVEL_TARGET_EARLY, LK_INIT_LEVEL_HEAP - 1);
     dprintf(SPEW, "initializing heap\n");
     heap_init();
